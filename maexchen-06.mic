@@ -1,0 +1,255 @@
+F08 ; 00 START:         CLEAR
+F0D ; 01                EXRL                R0-R7 = Spielstand aus M0-M7 (L und C), M0-M7 = 0
+1F9 ; 02                MOVI #F,T           LEDs: Level waehlen
+BAD ; 03 LV:            CALL GETK
+E03 ; 04                BRZ LV              0 nicht erlaubt
+99D ; 05                CMPI #9,rD
+D03 ; 06                BRC LV              A-F nicht erlaubt
+F0D ; 07                EXRL                Spielstand zurueck, R0-R7 = 0 (keine Ansage)
+165 ; 08                MOVI #6,LS
+160 ; 09                MOVI #6,LC
+198 ; 0A                MOVI #9,EL          EL = 2 (9 - Level)
+6D8 ; 0B                SUB rD,EL
+488 ; 0C                ADD EL,EL
+FC8 ; 0D                SUBC EL             Level 1: 16 -> F
+BBB ; 0E PTURN:         CALL ROLL
+119 ; 0F                MOVI #1,T
+BAD ; 10 PIN:           CALL GETK
+E10 ; 11                BRZ PIN             0 ignorieren
+9AD ; 12                CMPI #A,rD
+E19 ; 13                BRZ PANS
+96D ; 14                CMPI #6,rD
+D10 ; 15                BRC PIN             7-9, B-F ignorieren
+034 ; 16                MOV WL,WH           Ziffer von rechts einschieben
+0D3 ; 17                MOV rD,WL
+C10 ; 18                GOTO PIN
+BD4 ; 19 PANS:          CALL SORT           ordnen, Schluessel, Carry = hoeher als die Ansage
+D1C ; 1A                BRC PV
+C10 ; 1B                GOTO PIN            zu niedrig: weiter eingeben
+06A ; 1C PV:            MOV PK,QK
+02B ; 1D                MOV AH,QH
+01C ; 1E                MOV AL,QL
+076 ; 1F                MOV CK,PK
+042 ; 20                MOV WH,AH
+031 ; 21                MOV WL,AL
+9F6 ; 22                CMPI #F,PK
+E83 ; 23                BRZ DOUBTP          Maexchen: immer anzweifeln
+0E9 ; 24                MOV rE,T            U = Zaehler vor der Taste (GETK), unabhaengig von V
+0F7 ; 25                MOV rF,CK
+F05 ; 26                RND                 V = Zaehler nach der Taste (auch Quelle des Computerwurfs)
+4D7 ; 27                ADD rD,CK           Y = F(U) + D(V)
+09D ; 28                MOV T,rD
+4ED ; 29                ADD rE,rD           Z = E(U) + E(V)
+109 ; 2A                MOVI #0,T
+878 ; 2B                CMP CK,EL
+FB9 ; 2C                ADC T               T = 1: abgelenkt (Y < EL)
+E31 ; 2D                BRZ NOE
+97D ; 2E                CMPI #7,rD          abgelenkt: Muenzwurf
+D83 ; 2F                BRC DOUBTP
+C3F ; 30                GOTO CTURN
+137 ; 31 NOE:           MOVI #3,CK          Schwelle 64-67 (Schluessel 6 - 3): ueber 64 (1/4) bzw. ueber 65 (3/4) zweifeln
+0D3 ; 32                MOV rD,WL
+333 ; 33                ANDI #3,WL
+543 ; 34                ADDI #4,WL
+BE4 ; 35                CALL GT             Carry: Schwelle > Ansage, Zero: gleich
+D39 ; 36                BRC NT
+E39 ; 37                BRZ NT
+C83 ; 38                GOTO DOUBTP
+72A ; 39 NT:            SUBI #2,QK          eigene vorige Ansage unter 51 (Schluessel 2): kein Verdacht
+D3F ; 3A                BRC CTURN
+0B4 ; 3B                MOV QH,WH
+0C3 ; 3C                MOV QL,WL
+BEA ; 3D                CALL NEXT           W = naechster Wert nach der vorigen Ansage
+E83 ; 3E                BRZ DOUBTP          Minimalerhoehung: anzweifeln
+0FA ; 3F CTURN:         MOV rF,QK           nahe Luege: nach QK + 1 NEXT-Schritten merken (1-3, abgelenkt 1-4)
+33A ; 40                ANDI #3,QK
+49A ; 41                ADD T,QK
+71A ; 42                SUBI #1,QK
+FBA ; 43                ADC QK
+0D9 ; 44                MOV rD,T            Kopfwurf-Modus (1/4): Z und 6 = 6 -> QK + 8 (Bit 4: suchen)
+369 ; 45                ANDI #6,T
+529 ; 46                ADDI #2,T
+389 ; 47                ANDI #8,T
+49A ; 48                ADD T,QK
+BBB ; 49 HL:            CALL ROLL           Carry: Kopfwurf > Ansage
+10C ; 4A                MOVI #0,QL
+FCC ; 4B                SUBC QL             F oder 0
+2AC ; 4C                AND QK,QL
+97C ; 4D                CMPI #7,QL          Carry: hoeher und noch suchend
+D52 ; 4E                BRC HY
+0BB ; 4F                MOV QH,QH           Gegenstueck, gleich viele Befehle
+099 ; 50                MOV T,T
+C55 ; 51                GOTO HX
+04B ; 52 HY:            MOV WH,QH           Merkspeicher QH / T = Kopfwurf
+039 ; 53                MOV WL,T
+74A ; 54                SUBI #4,QK          Bit 4 weg, Bit 3 an: gefunden, keine nahe Luege
+585 ; 55 HX:            ADDI #8,LS          Bit 4 von LS (Leben <= 6) als Schleifenzaehler: zwei Durchlaeufe
+D58 ; 56                BRC HE
+C49 ; 57                GOTO HL
+BBB ; 58 HE:            CALL ROLL           echter Wurf (zuletzt, damit MD/ME ihn behalten); Carry: wahr
+D5E ; 59                BRC TR
+0BB ; 5A                MOV QH,QH           Gegenstueck, gleich viele Befehle
+099 ; 5B                MOV T,T
+37A ; 5C                ANDI #7,QK          Luege, Kopfwurf nicht gefunden: suchen aus (QK = n)
+C62 ; 5D                GOTO TX
+04B ; 5E TR:            MOV WH,QH           wahr: Merkspeicher = eigener Wurf
+039 ; 5F                MOV WL,T
+54A ; 60                ADDI #4,QK          keine nahe Luege (QK 4-F)
+F01 ; 61                NOP
+024 ; 62 TX:            MOV AH,WH           nahe Luege immer ausrechnen, immer 4 Schritte ab der Ansage
+013 ; 63                MOV AL,WL
+13D ; 64                MOVI #3,rD
+BEA ; 65 LP:            CALL NEXT
+5FA ; 66                ADDI #F,QK          QK war 0: dieser Schritt ist die Luege
+D6B ; 67                BRC LN
+04B ; 68                MOV WH,QH           Luege merken (QH, T)
+039 ; 69                MOV WL,T
+C6E ; 6A                GOTO LX
+044 ; 6B LN:            MOV WH,WH           Gegenstueck, gleich viele Befehle
+033 ; 6C                MOV WL,WL
+F01 ; 6D                NOP
+5FD ; 6E LX:            ADDI #F,rD
+D65 ; 6F                BRC LP
+0B4 ; 70 CANN:          MOV QH,WH
+093 ; 71                MOV T,WL
+BDC ; 72                CALL KEY            CK = Schluessel der Ansage
+076 ; 73                MOV CK,PK           Ansage des Computers ist jetzt zu ueberbieten
+024 ; 74                MOV AH,WH
+013 ; 75                MOV AL,WL
+0B2 ; 76                MOV QH,AH
+091 ; 77                MOV T,AL
+129 ; 78                MOVI #2,T
+BAD ; 79 CIN:           CALL GETK
+9BD ; 7A                CMPI #B,rD
+E91 ; 7B                BRZ DOUBTC
+9AD ; 7C                CMPI #A,rD
+E7F ; 7D                BRZ CACC
+C79 ; 7E                GOTO CIN
+11D ; 7F CACC:          MOVI #1,rD
+9F6 ; 80                CMPI #F,PK
+E8A ; 81                BRZ LOSEP           Maexchen geglaubt: 1 Leben, nicht aufdecken
+C0E ; 82                GOTO PTURN
+BB3 ; 83 DOUBTP:        CALL SHOWR
+E86 ; 84                BRZ DPT             gleich: Ansage war wahr
+C87 ; 85                GOTO DPF
+F09 ; 86 DPT:           STC
+102 ; 87 DPF:           MOVI #0,AH          rechte Seite 00 (MOVI laesst Carry stehen)
+101 ; 88                MOVI #0,AL
+D9A ; 89                BRC LOSEC
+6D5 ; 8A LOSEP:         SUB rD,LS
+FB5 ; 8B                ADC LS              nicht unter 0
+149 ; 8C                MOVI #4,T
+BAD ; 8D                CALL GETK
+05F ; 8E                MOV LS,rF
+EA9 ; 8F                BRZ GOC
+CA1 ; 90                GOTO NEWR           Carry ist 0 (KIN): Spieler beginnt
+BB3 ; 91 DOUBTC:        CALL SHOWR
+E94 ; 92                BRZ DCT
+C95 ; 93                GOTO DCF
+F09 ; 94 DCT:           STC
+042 ; 95 DCF:           MOV WH,AH
+031 ; 96                MOV WL,AL
+104 ; 97                MOVI #0,WH
+103 ; 98                MOVI #0,WL
+D8A ; 99                BRC LOSEP
+6D0 ; 9A LOSEC:         SUB rD,LC
+FB0 ; 9B                ADC LC
+189 ; 9C                MOVI #8,T
+BAD ; 9D                CALL GETK
+00F ; 9E                MOV LC,rF
+EA6 ; 9F                BRZ GOP
+F09 ; A0                STC                 Computer beginnt
+106 ; A1 NEWR:          MOVI #0,PK
+102 ; A2                MOVI #0,AH
+101 ; A3                MOVI #0,AL
+D3F ; A4                BRC CTURN
+C0E ; A5                GOTO PTURN
+F0D ; A6 GOP:           EXRL
+515 ; A7                ADDI #1,LS
+CAB ; A8                GOTO G2
+F0D ; A9 GOC:           EXRL
+510 ; AA                ADDI #1,LC
+F0D ; AB G2:            EXRL
+C00 ; AC                GOTO START
+FE9 ; AD GETK:          DOT T
+F60 ; AE                DISP #6,r0
+F05 ; AF                RND                 U: rE, rF bleiben bis zur Entscheidung erhalten
+FFD ; B0                KIN rD
+F02 ; B1                DISOUT
+F07 ; B2                RET
+F0E ; B3 SHOWR:         EXRM
+0D4 ; B4                MOV rD,WH
+0E3 ; B5                MOV rE,WL
+F0E ; B6                EXRM
+11D ; B7                MOVI #1,rD
+9E6 ; B8                CMPI #E,PK
+FBD ; B9                ADC rD
+CD4 ; BA                GOTO SORT
+F05 ; BB ROLL:          RND
+103 ; BC                MOVI #0,WL
+034 ; BD RP:            MOV WL,WH           erster Wuerfel nach WH (im ersten Durchlauf 0)
+0E7 ; BE                MOV rE,CK
+4F7 ; BF                ADD rF,CK
+FB7 ; C0                ADC CK              x = E + F, Ueberlauf als +1: 1-F (je 17/256), selten 0
+957 ; C1                CMPI #5,CK          g = Drittel: 0-5 -> 0, 6-A -> 1, B-F -> 2
+103 ; C2                MOVI #0,WL
+FB3 ; C3                ADC WL
+9A7 ; C4                CMPI #A,CK
+FB3 ; C5                ADC WL
+433 ; C6                ADD WL,WL
+0D7 ; C7                MOV rD,CK           + Bit 1 von D (Bit 4 haengt mit dem Drittel des anderen Wuerfels zusammen)
+F97 ; C8                SHR CK
+FB3 ; C9                ADC WL
+513 ; CA                ADDI #1,WL
+0D7 ; CB                MOV rD,CK           D und E tauschen
+0ED ; CC                MOV rE,rD
+07E ; CD                MOV CK,rE
+904 ; CE                CMPI #0,WH
+EBD ; CF                BRZ RP
+04D ; D0                MOV WH,rD
+03E ; D1                MOV WL,rE
+F7D ; D2                MAS rD
+F7E ; D3                MAS rE
+843 ; D4 SORT:          CMP WH,WL           Carry: WH < WL, tauschen
+10C ; D5                MOVI #0,QL
+FCC ; D6                SUBC QL             QL = F (tauschen) oder 0
+037 ; D7                MOV WL,CK
+647 ; D8                SUB WH,CK
+2C7 ; D9                AND QL,CK           CK = WL - WH oder 0
+474 ; DA                ADD CK,WH
+673 ; DB                SUB CK,WL
+047 ; DC KEY:           MOV WH,CK
+834 ; DD                CMP WL,WH           Carry: WL < WH, kein Pasch
+10C ; DE                MOVI #0,QL
+FCC ; DF                SUBC QL             F kein Pasch, 0 Pasch
+F8C ; E0                INV QL
+37C ; E1                ANDI #7,QL          7 bei Pasch
+4C7 ; E2                ADD QL,CK
+737 ; E3                SUBI #3,CK
+867 ; E4 GT:            CMP PK,CK
+EE8 ; E5                BRZ GL
+F01 ; E6                NOP
+F07 ; E7                RET
+813 ; E8 GL:            CMP AL,WL
+F07 ; E9                RET
+843 ; EA NEXT:          CMP WH,WL
+EF7 ; EB                BRZ NP
+924 ; EC                CMPI #2,WH
+EDC ; ED                BRZ KEY
+513 ; EE                ADDI #1,WL
+843 ; EF                CMP WH,WL
+EF2 ; F0                BRZ NC
+CDC ; F1                GOTO KEY
+113 ; F2 NC:            MOVI #1,WL          54 -> 61, 65 -> 11
+514 ; F3 NC2:           ADDI #1,WH
+974 ; F4                CMPI #7,WH
+EFD ; F5                BRZ N11
+CDC ; F6                GOTO KEY
+964 ; F7 NP:            CMPI #6,WH          Pasch: 11 -> 22 ... 66 -> 21
+EFB ; F8                BRZ N21
+513 ; F9                ADDI #1,WL
+CF3 ; FA                GOTO NC2
+114 ; FB N21:           MOVI #1,WH          ueber NC: WL = 1, WH = 2
+CF2 ; FC                GOTO NC
+114 ; FD N11:           MOVI #1,WH
+CDC ; FE                GOTO KEY
