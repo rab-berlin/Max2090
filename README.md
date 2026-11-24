@@ -3,7 +3,6 @@
 Würfel-Bluffspiel (Mäxchen, Meiern) für den **Busch Microtronic 2090**: ein Spieler gegen den Computer, nur mit der 6-stelligen Anzeige, den vier Ausgangs-LEDs und der Hex-Tastatur. Keine Matrix, keine Kabel, kein Userscript.
 
 - 255 Programmschritte (00-FE), 1 frei
-- im Emulator2090 gegen ein unabhängiges Regelmodell getestet, noch nicht am Gerät gespielt
 
 ## Datei
 
