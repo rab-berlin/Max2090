@@ -2,16 +2,12 @@
 
 Würfel-Bluffspiel (Mäxchen, Meiern) für den **Busch Microtronic 2090**: ein Spieler gegen den Computer, nur mit der 6-stelligen Anzeige, den vier Ausgangs-LEDs und der Hex-Tastatur. Keine Matrix, keine Kabel, kein Userscript.
 
-Aktuelle Version: **06** (die Versionsnummer steht nur in `maexchen.xml`), 255 Schritte (00–FE), 1 frei. Im Emulator2090 gegen ein unabhängiges Regelmodell getestet, noch nicht am Gerät gespielt.
+- 255 Programmschritte (00-FE), 1 frei
+- im Emulator2090 gegen ein unabhängiges Regelmodell getestet, noch nicht am Gerät gespielt
 
-## Dateien
+## Datei
 
-| Datei | Inhalt |
-|---|---|
-| `maexchen.mic` | Programm zum Laden (eine Zeile pro Schritt) |
-| `maexchen.src` | Quelle mit Marken und Registerrollen, übersetzt mit `micasm.py` (esp2090-firmware/tools) |
-| `maexchen.xml` | Regeln, Strategie, Register, Routinen mit Adressen, Zeitverhalten, Tests, offene Punkte |
-| `maexchen_test.py` | Test im Emulator2090: `python maexchen_test.py <Ordner mit microtronic.py>` |
+`maexchen.mic` – das Programm zum Laden, eine Zeile pro Schritt.
 
 ## Start
 
@@ -55,12 +51,3 @@ L  S S  K K  C
 ## Zufall
 
 Würfe kommen aus dem RND-Zähler direkt nach einem Tastendruck (der Zähler läuft, solange KIN wartet). Die Entscheidungen des Computers mischen den Zählerstand vor und nach der Taste, damit sie nicht an seinem Wurf hängen. Würfel: über alle 4096 Zählerstände höchstens 4,6 Prozent neben dem Sollwert.
-
-## Versionen
-
-- **06** Bluff ohne feste Obergrenze (1/4 der Lügen aus zwei Kopfwürfen, bis 21); Würfel mit Dritteln statt mod 3.
-- **05** Feste Seiten: links immer der Spieler, rechts immer der Computer.
-- **04** verworfen (nie mit 21 lügen – eine 21-Lüge lohnt sich, weil Zweifeln an Mäxchen 2 Leben kostet).
-- **03** Ohne Flag-Kosmetik, gleiche Dauer mit vorbelegtem Merkspeicher.
-- **02** Wahrheit und Lüge gleich lang.
-- **01** Erste Fassung, 9 Level.
