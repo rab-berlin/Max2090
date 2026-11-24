@@ -1,4 +1,4 @@
-"""Test fuer maexchen-06.mic (feste Seiten; Bluff 3/4 nah, 1/4 Kopfwurf bis 21) im Emulator2090 (microtronic.py) gegen ein unabhaengiges Regelmodell.
+"""Test fuer maexchen.mic (Version 06; feste Seiten, Bluff 3/4 nah, 1/4 Kopfwurf bis 21) im Emulator2090 (microtronic.py) gegen ein unabhaengiges Regelmodell.
 
 Der simulierte Spieler sitzt an der Tastatur: bei jedem KIN liest er LEDs und Anzeige,
 prueft sie gegen das Modell und waehlt eine Taste. Die Wartezeit vor jeder Taste setzt den
@@ -468,7 +468,7 @@ def zeit(mic, games=300, seed=11):
 
 
 if __name__ == "__main__":
-    mic = os.path.join(HERE, "maexchen-06.mic")
+    mic = os.path.join(HERE, "maexchen.mic")
     g = pruefen(mic, games=90, seed=7)
     print("Ablauftest:", dict(g.stats), "Schritte", g.cpu.steps)
     print("Spielstand", g.tally)

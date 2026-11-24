@@ -1,13 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<maexchen_project name="Mäxchen gegen den Computer" machine="Busch Microtronic 2090" version="06" language="de" program_file="maexchen-06.mic" source_file="maexchen-06.src" instruction_set_xml="microtronic.xml (Revision 41)" emulator="microtronic.py (Emulator2090, Version 26)">
+<maexchen_project name="Mäxchen gegen den Computer" machine="Busch Microtronic 2090" version="06" language="de" program_file="maexchen.mic" source_file="maexchen.src" instruction_set_xml="microtronic.xml (Revision 45)" emulator="microtronic.py (Emulator2090, Version 26)">
   <purpose>Mäxchen (Meiern) für zwei: Spieler gegen den Computer, nur 6-stellige Anzeige, die vier LEDs der Ausgänge und die Hex-Tastatur (KIN). Keine Matrix, keine Kabel, kein Userscript. Computer mit 9 Spielstärken, strategisch mit Streuung. Programm 255 Schritte (00-FE), frei: 1. Version 02: Wahrheit und Lüge des Computers dauern exakt gleich lang (man konnte die Lüge an der Rechendauer erraten). Version 03: ohne Flag-Kosmetik (Besitzer: kurze Unterschiede im Flackern der Flag-LEDs sind nicht erkennbar), keine Auswahlverzweigung mehr. Version 04 verworfen (nie mit 21 lügen). Version 05: feste Seiten auf der Anzeige, links immer der Spieler, rechts immer der Computer. Version 06: Bluff ohne feste Obergrenze: in 3/4 der Fälle wie bisher 1-3 Stufen über der Ansage, in 1/4 der Fälle zwei Kopfwürfe, der erste über der Ansage wird angesagt (bis 21, so oft wie als echter Wurf); Würfelformel mit Dritteln statt mod 3 (10 Schritte gespart). Im Emulator2090 gegen ein unabhängiges Python-Modell getestet, noch nicht am Gerät.</purpose>
-  <package>
-    <file name="maexchen06_test.py">Ablauftest (Modell v06: Würfel mit Dritteln, Kopfwürfe aus den drei RND in CTURN, Kopfwurf-Modus aus Z), Würfel exakt über 4096 Zählerstände, Zeittest: Befehlszahl von CTURN bis KIN, Wahrheit gegen Lüge</file>
-    <file name="maexchen-06.src">Quelle mit Marken, #define und Kopfkommentar (Bedienung, Regeln, Register)</file>
-    <file name="maexchen-06.mic">übersetzt mit esp2090-firmware/tools/micasm.py</file>
-    <file name="maexchen_test.py">Ablauftest im Emulator2090 gegen das Regelmodell (Spieler am KIN, Zähler je Taste zufällig)</file>
-    <file name="maexchen_sim.py">Strategiesuche und Level-Simulation (Rangmodell), Würfel- und Bedingtheitsprüfung, Spielstärke Emulator gegen Simulation</file>
-    <file name="maexchen-06.xml">dieses Dokument</file>
+  <package note="Im Repo Max2090 heißen die Dateien ohne Versionsnummer; die Version steht nur in diesem Dokument (Attribut version). Im Projekt: maexchen-06.*, maexchen06_test.py; ältere Versionen und maexchen_sim.py / maexchen_bluff_sim.py nur im Projekt.">
+    <file name="maexchen.mic">übersetzt mit esp2090-firmware/tools/micasm.py</file>
+    <file name="maexchen.src">Quelle mit Marken, #define und Kopfkommentar (Bedienung, Regeln, Register)</file>
+    <file name="maexchen_test.py">Ablauftest (Modell v06: Würfel mit Dritteln, Kopfwürfe aus den drei RND in CTURN, Kopfwurf-Modus aus Z), Würfel exakt über 4096 Zählerstände, Zeittest: Befehlszahl von CTURN bis KIN, Wahrheit gegen Lüge</file>
+    <file name="maexchen.xml">dieses Dokument</file>
   </package>
   <workflow>
     <step>Start: RESET (Spielstand 0:0), RUN. LEDs F, die Anzeige zeigt den Spielstand (gewonnene Spiele: links du, rechts Computer, sonst 0). Level 1-9 tippen (0 und A-F werden ignoriert). Der Spieler beginnt.</step>
@@ -75,7 +73,7 @@
     <test>90 Spiele über alle Level mit eingestreuten Fehltasten (0, 7-9, B-F, ungültige Level, zu niedrige Ansagen, vertauschte Ziffern): 781 Runden, 853 Entscheidungen, 99 Mäxchen-Runden, 0 Abweichungen.</test>
     <test>Würfel exakt über alle 4096 Zählerstände: höchstens 4,6 Prozent Abweichung je Ergebnis. Computerwurf nach „geglaubt“ für Level 1, 5, 7 exakt über 4096 x 256 (V, U): ebenfalls 4,6 Prozent.</test>
     <test>Spielstärke: 600 Spiele je Level und Gegner im Emulator, Ergebnis im Rahmen der Stichprobe gleich der Simulation (siehe computer_strategy/strength).</test>
-    <test>Version 06: maexchen06_test.py, Ablauftest 90 Spiele bestanden (773 Runden, 232 Lügen, davon 31 aus Kopfwürfen, Ansage stimmt jedes Mal mit dem Modell); Würfel über alle 4096 Zählerstände höchstens 4,6 Prozent; Zeittest 1563 Computeransagen, 749 Lügen, je Ansage-Gruppe eine Befehlszahl; check_mic: CALL-Tiefe 1. Spielstärke 1000 Spiele je Level siehe strength.</test>
+    <test>Version 06: maexchen_test.py (im Projekt maexchen06_test.py), Ablauftest 90 Spiele bestanden (773 Runden, 232 Lügen, davon 31 aus Kopfwürfen, Ansage stimmt jedes Mal mit dem Modell); Würfel über alle 4096 Zählerstände höchstens 4,6 Prozent; Zeittest 1563 Computeransagen, 749 Lügen, je Ansage-Gruppe eine Befehlszahl; check_mic: CALL-Tiefe 1. Spielstärke 1000 Spiele je Level siehe strength.</test>
     <test>Version 06, Fehler im Entwurf: die erste Würfelformel mit Dritteln und Paarbit [D ≥ 8] wich bis 72 Prozent ab (Paarbit und Drittel des anderen Würfels hängen über dieselbe Ziffer zusammen); jetzt Bit 1.</test>
     <test>Version 05: maexchen05_test.py prüft zusätzlich die feste Seitenbelegung in jedem Bild (Spielerwurf links, Ansage des Computers rechts, Aufdecken auf der Seite des Ansagers, Gegenseite 00). Ablauftest 90 Spiele bestanden; Zeittest 1620 Computeransagen, 779 Lügen, je Ansage-Gruppe eine Befehlszahl; Spielstärke Level 1/5/9 33,1/39,8/51,8 Prozent (2000 Spiele je Wert).</test>
     <test>Version 03: maexchen03_test.py, Ablauftest 90 Spiele bestanden; Zeittest 300 Spiele (1682 Computeransagen, 872 Lügen): je Ansage-Gruppe genau eine Befehlszahl für Wahrheit und Lüge.</test>

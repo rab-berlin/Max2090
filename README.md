@@ -2,16 +2,16 @@
 
 Würfel-Bluffspiel (Mäxchen, Meiern) für den **Busch Microtronic 2090**: ein Spieler gegen den Computer, nur mit der 6-stelligen Anzeige, den vier Ausgangs-LEDs und der Hex-Tastatur. Keine Matrix, keine Kabel, kein Userscript.
 
-Aktuelle Version: **06**, 255 Schritte (00–FE), 1 frei. Im Emulator2090 gegen ein unabhängiges Regelmodell getestet, noch nicht am Gerät gespielt.
+Aktuelle Version: **06** (die Versionsnummer steht nur in `maexchen.xml`), 255 Schritte (00–FE), 1 frei. Im Emulator2090 gegen ein unabhängiges Regelmodell getestet, noch nicht am Gerät gespielt.
 
 ## Dateien
 
 | Datei | Inhalt |
 |---|---|
-| `maexchen-06.mic` | Programm zum Laden (eine Zeile pro Schritt) |
-| `maexchen-06.src` | Quelle mit Marken und Registerrollen, übersetzt mit `micasm.py` (esp2090-firmware/tools) |
-| `maexchen-06.xml` | Regeln, Strategie, Register, Routinen mit Adressen, Zeitverhalten, Tests, offene Punkte |
-| `maexchen06_test.py` | Test im Emulator2090: `python maexchen06_test.py <Ordner mit microtronic.py>` |
+| `maexchen.mic` | Programm zum Laden (eine Zeile pro Schritt) |
+| `maexchen.src` | Quelle mit Marken und Registerrollen, übersetzt mit `micasm.py` (esp2090-firmware/tools) |
+| `maexchen.xml` | Regeln, Strategie, Register, Routinen mit Adressen, Zeitverhalten, Tests, offene Punkte |
+| `maexchen_test.py` | Test im Emulator2090: `python maexchen_test.py <Ordner mit microtronic.py>` |
 
 ## Start
 
